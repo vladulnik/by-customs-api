@@ -5,4 +5,8 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <include file="db/changelog/changes/001-create-declaration-table.xml"/>
+    <include file="db/changelog/changes/002-create-item-table.xml"/>
+    <include file="db/changelog/changes/003-create-participant-table.xml"/>
+    <include file="db/changelog/changes/004-create-payment-table.xml"/>
+
 </databaseChangeLog>

@@ -34,16 +34,28 @@ public class ItemEntity {
     private Long id;
 
     /**
-     * Описание товара (например, "Ноутбук").
+     * Код ТН ВЭД.
+     */
+    @Column(name = "hs_code", nullable = false)
+    private String hsCode;
+
+    /**
+     * Стоимость товара.
      */
     @Column(nullable = false)
-    private String description;
+    private double value;
 
     /**
      * Вес товара в килограммах.
      */
     @Column(nullable = false)
     private double weight;
+
+    /**
+     * Страна происхождения товара.
+     */
+    @Column(name = "origin_country", nullable = false)
+    private String originCountry;
 
     /**
      * Ссылка на декларацию, к которой относится товар.

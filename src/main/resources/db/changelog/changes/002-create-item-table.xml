@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="002" author="vladulnik">
+        <createTable tableName="items">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="hs_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="value" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="weight" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="origin_country" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="declaration_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="items"
+                baseColumnNames="declaration_id"
+                constraintName="fk_items_declaration"
+                referencedTableName="declarations"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>
