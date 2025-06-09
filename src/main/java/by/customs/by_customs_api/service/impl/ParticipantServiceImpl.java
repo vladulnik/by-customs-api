@@ -1,57 +1,78 @@
 package by.customs.by_customs_api.service.impl;
 
 import by.customs.by_customs_api.dto.ParticipantDto;
+import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.ParticipantEntity;
 import by.customs.by_customs_api.exception.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.ParticipantMapper;
+import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ParticipantRepository;
 import by.customs.by_customs_api.service.ParticipantService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class ParticipantServiceImpl implements ParticipantService {
 
-    private final ParticipantRepository repository;
-    private final ParticipantMapper mapper;
+    private final ParticipantRepository participantRepository;
+    private final DeclarationRepository declarationRepository;
+    private final ParticipantMapper participantMapper;
+
+    public ParticipantServiceImpl(ParticipantRepository participantRepository,
+                                  DeclarationRepository declarationRepository,
+                                  ParticipantMapper participantMapper) {
+        this.participantRepository = participantRepository;
+        this.declarationRepository = declarationRepository;
+        this.participantMapper = participantMapper;
+    }
 
     @Override
     public ParticipantDto create(ParticipantDto dto) {
-        return mapper.toDto(repository.save(mapper.toEntity(dto)));
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
+        ParticipantEntity e = participantMapper.toEntity(dto);
+        e.setDeclaration(decl);
+        return participantMapper.toDto(participantRepository.save(e));
     }
 
     @Override
     public ParticipantDto getById(Long id) {
-        ParticipantEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Participant not found with id: " + id));
-        return mapper.toDto(entity);
+        ParticipantEntity e = participantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Participant not found: " + id));
+        return participantMapper.toDto(e);
     }
 
     @Override
     public List<ParticipantDto> getAll() {
-        return repository.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
+        return participantRepository.findAll()
+                .stream()
+                .map(participantMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ParticipantDto update(Long id, ParticipantDto dto) {
-        ParticipantEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Participant not found with id: " + id));
+        ParticipantEntity existing = participantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Participant not found: " + id));
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
 
-        entity.setName(dto.getName());
-        entity.setAddress(dto.getAddress());
+        existing.setName(dto.getName());
+        existing.setAddress(dto.getAddress());
+        existing.setDeclaration(decl);
 
-        return mapper.toDto(repository.save(entity));
+        return participantMapper.toDto(participantRepository.save(existing));
     }
 
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Participant not found with id: " + id);
+        if (!participantRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Participant not found: " + id);
         }
-        repository.deleteById(id);
+        participantRepository.deleteById(id);
     }
 }

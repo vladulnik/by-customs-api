@@ -1,59 +1,79 @@
 package by.customs.by_customs_api.service.impl;
 
 import by.customs.by_customs_api.dto.ItemDto;
+import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.ItemEntity;
 import by.customs.by_customs_api.exception.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.ItemMapper;
+import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ItemRepository;
 import by.customs.by_customs_api.service.ItemService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository repository;
-    private final ItemMapper mapper;
+    private final ItemRepository itemRepository;
+    private final DeclarationRepository declarationRepository;
+    private final ItemMapper itemMapper;
+
+    public ItemServiceImpl(ItemRepository itemRepository,
+                           DeclarationRepository declarationRepository,
+                           ItemMapper itemMapper) {
+        this.itemRepository = itemRepository;
+        this.declarationRepository = declarationRepository;
+        this.itemMapper = itemMapper;
+    }
 
     @Override
     public ItemDto create(ItemDto dto) {
-        return mapper.toDto(repository.save(mapper.toEntity(dto)));
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
+        ItemEntity e = itemMapper.toEntity(dto);
+        e.setDeclaration(decl);
+        return itemMapper.toDto(itemRepository.save(e));
     }
 
     @Override
     public ItemDto getById(Long id) {
-        ItemEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
-        return mapper.toDto(entity);
+        ItemEntity e = itemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
+        return itemMapper.toDto(e);
     }
 
     @Override
     public List<ItemDto> getAll() {
-        return repository.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
+        return itemRepository.findAll().stream()
+                .map(itemMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto update(Long id, ItemDto dto) {
-        ItemEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + id));
+        ItemEntity existing = itemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
 
-        entity.setHsCode(dto.getHsCode());
-        entity.setValue(dto.getValue());
-        entity.setWeight(dto.getWeight());
-        entity.setOriginCountry(dto.getOriginCountry());
+        existing.setHsCode(dto.getHsCode());
+        existing.setValue(dto.getValue());
+        existing.setWeight(dto.getWeight());
+        existing.setOriginCountry(dto.getOriginCountry());
+        existing.setDeclaration(decl);
 
-        return mapper.toDto(repository.save(entity));
+        return itemMapper.toDto(itemRepository.save(existing));
     }
 
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Item not found with id: " + id);
+        if (!itemRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Item not found: " + id);
         }
-        repository.deleteById(id);
+        itemRepository.deleteById(id);
     }
 }

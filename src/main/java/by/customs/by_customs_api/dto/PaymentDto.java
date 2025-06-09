@@ -1,19 +1,25 @@
 package by.customs.by_customs_api.dto;
 
+/**
+ * DTO для представления таможенного платежа.
+ */
 public class PaymentDto {
 
     private Long id;
     private double duty;
     private double vat;
     private double excise;
+    private Long declarationId;
 
-    public PaymentDto() {}
+    public PaymentDto() {
+    }
 
-    public PaymentDto(Long id, double duty, double vat, double excise) {
+    public PaymentDto(Long id, double duty, double vat, double excise, Long declarationId) {
         this.id = id;
         this.duty = duty;
         this.vat = vat;
         this.excise = excise;
+        this.declarationId = declarationId;
     }
 
     public Long getId() {
@@ -46,5 +52,13 @@ public class PaymentDto {
 
     public void setExcise(double excise) {
         this.excise = excise;
+    }
+
+    public Long getDeclarationId() {
+        return declarationId;
+    }
+
+    public void setDeclarationId(Long declarationId) {
+        this.declarationId = declarationId;
     }
 }

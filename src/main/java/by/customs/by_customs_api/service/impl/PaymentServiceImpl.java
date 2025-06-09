@@ -1,58 +1,79 @@
 package by.customs.by_customs_api.service.impl;
 
 import by.customs.by_customs_api.dto.PaymentDto;
+import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.PaymentEntity;
 import by.customs.by_customs_api.exception.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.PaymentMapper;
+import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.PaymentRepository;
 import by.customs.by_customs_api.service.PaymentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentRepository repository;
-    private final PaymentMapper mapper;
+    private final PaymentRepository paymentRepository;
+    private final DeclarationRepository declarationRepository;
+    private final PaymentMapper paymentMapper;
+
+    public PaymentServiceImpl(PaymentRepository paymentRepository,
+                              DeclarationRepository declarationRepository,
+                              PaymentMapper paymentMapper) {
+        this.paymentRepository = paymentRepository;
+        this.declarationRepository = declarationRepository;
+        this.paymentMapper = paymentMapper;
+    }
 
     @Override
     public PaymentDto create(PaymentDto dto) {
-        return mapper.toDto(repository.save(mapper.toEntity(dto)));
+        DeclarationEntity declaration = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Declaration not found"));
+
+        PaymentEntity entity = paymentMapper.toEntity(dto);
+        entity.setDeclaration(declaration);
+        return paymentMapper.toDto(paymentRepository.save(entity));
     }
 
     @Override
     public PaymentDto getById(Long id) {
-        PaymentEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
-        return mapper.toDto(entity);
+        return paymentRepository.findById(id)
+                .map(paymentMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
     }
 
     @Override
     public List<PaymentDto> getAll() {
-        return repository.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
+        return paymentRepository.findAll()
+                .stream()
+                .map(paymentMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public PaymentDto update(Long id, PaymentDto dto) {
-        PaymentEntity entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
+        PaymentEntity existing = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
-        entity.setDuty(dto.getDuty());
-        entity.setVat(dto.getVat());
-        entity.setExcise(dto.getExcise());
+        DeclarationEntity declaration = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Declaration not found"));
 
-        return mapper.toDto(repository.save(entity));
+        existing.setDuty(dto.getDuty());
+        existing.setVat(dto.getVat());
+        existing.setExcise(dto.getExcise());
+        existing.setDeclaration(declaration);
+
+        return paymentMapper.toDto(paymentRepository.save(existing));
     }
 
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Payment not found with id: " + id);
+        if (!paymentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Payment not found");
         }
-        repository.deleteById(id);
+        paymentRepository.deleteById(id);
     }
 }

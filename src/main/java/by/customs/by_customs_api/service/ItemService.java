@@ -4,10 +4,18 @@ import by.customs.by_customs_api.dto.ItemDto;
 
 import java.util.List;
 
+/**
+ * CRUD-интерфейс для работы с товарными позициями.
+ */
 public interface ItemService {
+
     ItemDto create(ItemDto dto);
+
     ItemDto getById(Long id);
+
     List<ItemDto> getAll();
+
     ItemDto update(Long id, ItemDto dto);
+
     void delete(Long id);
 }
