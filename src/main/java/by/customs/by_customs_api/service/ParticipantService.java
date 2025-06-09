@@ -6,8 +6,12 @@ import java.util.List;
 
 public interface ParticipantService {
     ParticipantDto create(ParticipantDto dto);
+
     ParticipantDto getById(Long id);
+
     List<ParticipantDto> getAll();
+
     ParticipantDto update(Long id, ParticipantDto dto);
+
     void delete(Long id);
 }

@@ -1,14 +1,21 @@
 package by.customs.by_customs_api.dto;
 
-/**
- * DTO для представления таможенного платежа.
- */
-public class PaymentDto {
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
+public class PaymentDto {
     private Long id;
+
+    @PositiveOrZero(message = "Пошлина должна быть неотрицательной")
     private double duty;
+
+    @PositiveOrZero(message = "НДС должен быть неотрицательным")
     private double vat;
+
+    @PositiveOrZero(message = "Акциз должен быть неотрицательным")
     private double excise;
+
+    @NotNull(message = "ID декларации обязателен")
     private Long declarationId;
 
     public PaymentDto() {

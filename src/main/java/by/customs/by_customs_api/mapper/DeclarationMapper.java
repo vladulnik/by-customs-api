@@ -7,5 +7,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface DeclarationMapper {
     DeclarationDto toDto(DeclarationEntity entity);
+
     DeclarationEntity toEntity(DeclarationDto dto);
 }

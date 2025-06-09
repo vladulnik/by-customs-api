@@ -1,0 +1,36 @@
+<!-- src/main/resources/db/changelog/changes/005-add-unique-constraints.xml -->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="005-declaration-unique-number" author="vladulnik">
+        <addUniqueConstraint
+                columnNames="number"
+                tableName="declarations"
+                constraintName="uc_declarations_number"/>
+    </changeSet>
+
+    <changeSet id="006-item-unique-hscode-decl" author="vladulnik">
+        <addUniqueConstraint
+                columnNames="hs_code, declaration_id"
+                tableName="items"
+                constraintName="uc_items_hscode_decl"/>
+    </changeSet>
+
+    <changeSet id="007-participant-unique" author="vladulnik">
+        <addUniqueConstraint
+                columnNames="name, address, declaration_id"
+                tableName="participants"
+                constraintName="uc_participants_name_addr_decl"/>
+    </changeSet>
+
+    <changeSet id="008-payment-unique-decl" author="vladulnik">
+        <addUniqueConstraint
+                columnNames="declaration_id"
+                tableName="payments"
+                constraintName="uc_payments_decl"/>
+    </changeSet>
+</databaseChangeLog>

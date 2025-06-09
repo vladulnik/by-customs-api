@@ -8,5 +8,6 @@
     <include file="db/changelog/changes/002-create-item-table.xml"/>
     <include file="db/changelog/changes/003-create-participant-table.xml"/>
     <include file="db/changelog/changes/004-create-payment-table.xml"/>
+    <include file="db/changelog/changes/005-add-unique-constraints.xml"/>
 
 </databaseChangeLog>
