@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Сущность участника декларации.
+ * Сущность, представляющая участника декларации.
  */
 @Data
 @Builder
@@ -24,12 +26,15 @@ public class ParticipantEntity {
 
     public static final String TABLE_NAME = "participants";
 
+    /**
+     * Уникальный идентификатор участника.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Имя или название участника.
+     * Название или ФИО.
      */
     @Column(nullable = false)
     private String name;
@@ -39,4 +44,11 @@ public class ParticipantEntity {
      */
     @Column(nullable = false)
     private String address;
+
+    /**
+     * Связь с декларацией.
+     */
+    @ManyToOne
+    @JoinColumn(name = "declaration_id", nullable = false)
+    private DeclarationEntity declaration;
 }
