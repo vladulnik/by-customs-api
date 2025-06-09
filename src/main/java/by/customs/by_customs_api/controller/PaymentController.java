@@ -3,6 +3,8 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.PaymentDto;
 import by.customs.by_customs_api.service.PaymentService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,47 +15,41 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    private final PaymentService svc;
 
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
+    public PaymentController(PaymentService svc) {
+        this.svc = svc;
     }
 
     @PostMapping
     public ResponseEntity<PaymentDto> create(@RequestBody @Valid PaymentDto dto) {
-        PaymentDto created = paymentService.create(dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(svc.create(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDto> getById(@PathVariable Long id) {
-        PaymentDto dto = paymentService.getById(id);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(svc.getById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentDto>> getAll() {
-        List<PaymentDto> list = paymentService.getAll();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<Page<PaymentDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(svc.getAll(pageable));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PaymentDto> update(
             @PathVariable Long id,
             @RequestBody @Valid PaymentDto dto) {
-        PaymentDto updated = paymentService.update(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(svc.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        paymentService.delete(id);
+        svc.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

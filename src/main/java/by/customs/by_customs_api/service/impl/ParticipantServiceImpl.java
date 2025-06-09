@@ -8,12 +8,13 @@ import by.customs.by_customs_api.mapper.ParticipantMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ParticipantRepository;
 import by.customs.by_customs_api.service.ParticipantService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ParticipantServiceImpl implements ParticipantService {
 
     private final ParticipantRepository participantRepository;
@@ -33,45 +34,45 @@ public class ParticipantServiceImpl implements ParticipantService {
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
-        ParticipantEntity e = participantMapper.toEntity(dto);
-        e.setDeclaration(decl);
-        return participantMapper.toDto(participantRepository.save(e));
+        ParticipantEntity entity = participantMapper.toEntity(dto);
+        entity.setDeclaration(decl);
+        return participantMapper.toDto(participantRepository.save(entity));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ParticipantDto getById(Long id) {
-        ParticipantEntity e = participantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Participant not found: " + id));
-        return participantMapper.toDto(e);
+        ParticipantEntity entity = participantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Participant not found with id: " + id));
+        return participantMapper.toDto(entity);
     }
 
     @Override
-    public List<ParticipantDto> getAll() {
-        return participantRepository.findAll()
-                .stream()
-                .map(participantMapper::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<ParticipantDto> getAll(Pageable pageable) {
+        return participantRepository.findAll(pageable)
+                .map(participantMapper::toDto);
     }
 
     @Override
     public ParticipantDto update(Long id, ParticipantDto dto) {
         ParticipantEntity existing = participantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Participant not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Participant not found with id: " + id));
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
-
         existing.setName(dto.getName());
         existing.setAddress(dto.getAddress());
         existing.setDeclaration(decl);
-
         return participantMapper.toDto(participantRepository.save(existing));
     }
 
     @Override
     public void delete(Long id) {
         if (!participantRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Participant not found: " + id);
+            throw new ResourceNotFoundException("Participant not found with id: " + id);
         }
         participantRepository.deleteById(id);
     }

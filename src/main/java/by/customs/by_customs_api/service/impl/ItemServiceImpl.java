@@ -8,12 +8,13 @@ import by.customs.by_customs_api.mapper.ItemMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ItemRepository;
 import by.customs.by_customs_api.service.ItemService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -33,29 +34,32 @@ public class ItemServiceImpl implements ItemService {
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
-        ItemEntity e = itemMapper.toEntity(dto);
-        e.setDeclaration(decl);
-        return itemMapper.toDto(itemRepository.save(e));
+        ItemEntity entity = itemMapper.toEntity(dto);
+        entity.setDeclaration(decl);
+        return itemMapper.toDto(itemRepository.save(entity));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDto getById(Long id) {
-        ItemEntity e = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
-        return itemMapper.toDto(e);
+        ItemEntity entity = itemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Item not found with id: " + id));
+        return itemMapper.toDto(entity);
     }
 
     @Override
-    public List<ItemDto> getAll() {
-        return itemRepository.findAll().stream()
-                .map(itemMapper::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<ItemDto> getAll(Pageable pageable) {
+        return itemRepository.findAll(pageable)
+                .map(itemMapper::toDto);
     }
 
     @Override
     public ItemDto update(Long id, ItemDto dto) {
         ItemEntity existing = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Item not found with id: " + id));
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
@@ -72,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void delete(Long id) {
         if (!itemRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Item not found: " + id);
+            throw new ResourceNotFoundException("Item not found with id: " + id);
         }
         itemRepository.deleteById(id);
     }

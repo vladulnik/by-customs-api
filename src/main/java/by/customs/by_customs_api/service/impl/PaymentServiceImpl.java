@@ -8,12 +8,13 @@ import by.customs.by_customs_api.mapper.PaymentMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.PaymentRepository;
 import by.customs.by_customs_api.service.PaymentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -30,49 +31,49 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto create(PaymentDto dto) {
-        DeclarationEntity declaration = declarationRepository.findById(dto.getDeclarationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Declaration not found"));
-
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
         PaymentEntity entity = paymentMapper.toEntity(dto);
-        entity.setDeclaration(declaration);
+        entity.setDeclaration(decl);
         return paymentMapper.toDto(paymentRepository.save(entity));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PaymentDto getById(Long id) {
-        return paymentRepository.findById(id)
-                .map(paymentMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+        PaymentEntity entity = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Payment not found with id: " + id));
+        return paymentMapper.toDto(entity);
     }
 
     @Override
-    public List<PaymentDto> getAll() {
-        return paymentRepository.findAll()
-                .stream()
-                .map(paymentMapper::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<PaymentDto> getAll(Pageable pageable) {
+        return paymentRepository.findAll(pageable)
+                .map(paymentMapper::toDto);
     }
 
     @Override
     public PaymentDto update(Long id, PaymentDto dto) {
         PaymentEntity existing = paymentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-
-        DeclarationEntity declaration = declarationRepository.findById(dto.getDeclarationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Declaration not found"));
-
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Payment not found with id: " + id));
+        DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Declaration not found with id: " + dto.getDeclarationId()));
         existing.setDuty(dto.getDuty());
         existing.setVat(dto.getVat());
         existing.setExcise(dto.getExcise());
-        existing.setDeclaration(declaration);
-
+        existing.setDeclaration(decl);
         return paymentMapper.toDto(paymentRepository.save(existing));
     }
 
     @Override
     public void delete(Long id) {
         if (!paymentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Payment not found");
+            throw new ResourceNotFoundException("Payment not found with id: " + id);
         }
         paymentRepository.deleteById(id);
     }

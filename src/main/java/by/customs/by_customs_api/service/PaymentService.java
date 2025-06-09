@@ -1,18 +1,18 @@
 package by.customs.by_customs_api.service;
 
 import by.customs.by_customs_api.dto.PaymentDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PaymentService {
 
-    PaymentDto create(PaymentDto paymentDto);
+    PaymentDto create(PaymentDto dto);
 
     PaymentDto getById(Long id);
 
-    List<PaymentDto> getAll();
+    Page<PaymentDto> getAll(Pageable pageable);
 
-    PaymentDto update(Long id, PaymentDto paymentDto);
+    PaymentDto update(Long id, PaymentDto dto);
 
     void delete(Long id);
 }

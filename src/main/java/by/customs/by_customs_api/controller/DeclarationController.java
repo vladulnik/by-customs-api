@@ -3,6 +3,9 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.DeclarationDto;
 import by.customs.by_customs_api.service.DeclarationService;
 import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,47 +16,41 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/declarations")
 public class DeclarationController {
 
-    private final DeclarationService declarationService;
+    private final DeclarationService svc;
 
-    public DeclarationController(DeclarationService declarationService) {
-        this.declarationService = declarationService;
+    public DeclarationController(DeclarationService svc) {
+        this.svc = svc;
     }
 
     @PostMapping
     public ResponseEntity<DeclarationDto> create(@RequestBody @Valid DeclarationDto dto) {
-        DeclarationDto created = declarationService.create(dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(svc.create(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeclarationDto> getById(@PathVariable Long id) {
-        DeclarationDto dto = declarationService.getById(id);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(svc.getById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<DeclarationDto>> getAll() {
-        List<DeclarationDto> list = declarationService.getAll();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<Page<DeclarationDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(svc.getAll(pageable));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeclarationDto> update(
             @PathVariable Long id,
             @RequestBody @Valid DeclarationDto dto) {
-        DeclarationDto updated = declarationService.update(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(svc.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        declarationService.delete(id);
+        svc.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

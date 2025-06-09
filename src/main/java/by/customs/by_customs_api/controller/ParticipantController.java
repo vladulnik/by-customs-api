@@ -3,6 +3,8 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.ParticipantDto;
 import by.customs.by_customs_api.service.ParticipantService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,47 +15,41 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/participants")
 public class ParticipantController {
 
-    private final ParticipantService participantService;
+    private final ParticipantService svc;
 
-    public ParticipantController(ParticipantService participantService) {
-        this.participantService = participantService;
+    public ParticipantController(ParticipantService svc) {
+        this.svc = svc;
     }
 
     @PostMapping
     public ResponseEntity<ParticipantDto> create(@RequestBody @Valid ParticipantDto dto) {
-        ParticipantDto created = participantService.create(dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(svc.create(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ParticipantDto> getById(@PathVariable Long id) {
-        ParticipantDto dto = participantService.getById(id);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(svc.getById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<ParticipantDto>> getAll() {
-        List<ParticipantDto> list = participantService.getAll();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<Page<ParticipantDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(svc.getAll(pageable));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ParticipantDto> update(
             @PathVariable Long id,
             @RequestBody @Valid ParticipantDto dto) {
-        ParticipantDto updated = participantService.update(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(svc.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        participantService.delete(id);
+        svc.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
