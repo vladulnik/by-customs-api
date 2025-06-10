@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional  // по умолчанию: create/update/delete в транзакции
+@Transactional
 public class DeclarationServiceImpl implements DeclarationService {
 
     private final DeclarationRepository repository;
