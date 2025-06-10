@@ -3,6 +3,7 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.PaymentDto;
 import by.customs.by_customs_api.service.PaymentService;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class PaymentController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PaymentDto>> getAll(Pageable pageable) {
+    public ResponseEntity<Page<PaymentDto>> getAll(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(svc.getAll(pageable));
     }
 

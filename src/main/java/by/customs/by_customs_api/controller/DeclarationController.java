@@ -4,6 +4,8 @@ import by.customs.by_customs_api.dto.DeclarationDto;
 import by.customs.by_customs_api.service.DeclarationService;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +39,7 @@ public class DeclarationController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<DeclarationDto>> getAll(Pageable pageable) {
+    public ResponseEntity<Page<DeclarationDto>> getAll(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(svc.getAll(pageable));
     }
 

@@ -3,6 +3,7 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.ParticipantDto;
 import by.customs.by_customs_api.service.ParticipantService;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class ParticipantController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ParticipantDto>> getAll(Pageable pageable) {
+    public ResponseEntity<Page<ParticipantDto>> getAll(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(svc.getAll(pageable));
     }
 
