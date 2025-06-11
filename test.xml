@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Declaration xmlns="urn:by.customs:declaration" number="TEST-123">
+  <date>2025-06-15</date>
+  <Items>
+    <Item>
+      <HSCode>HS0001</HSCode>
+      <Value>123.45</Value>
+      <Weight>1.2</Weight>
+      <OriginCountry>CN</OriginCountry>
+    </Item>
+  </Items>
+  <Participants>
+    <Participant>
+      <Name>ACME Corp</Name>
+      <Address>ул. Пример, 1</Address>
+    </Participant>
+  </Participants>
+  <Payments>
+    <Payment>
+      <Duty>10.0</Duty>
+      <VAT>2.0</VAT>
+      <Excise>0.5</Excise>
+    </Payment>
+  </Payments>
+</Declaration>
