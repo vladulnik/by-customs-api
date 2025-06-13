@@ -1,49 +1,29 @@
 package by.customs.by_customs_api.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * DTO для декларации
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DeclarationDto {
     private Long id;
-
-    @NotBlank(message = "Номер декларации обязателен")
     private String number;
-
-    @NotNull(message = "Дата декларации обязательна")
     private LocalDate date;
-
-    public DeclarationDto() {
-    }
-
-    public DeclarationDto(Long id, String number, LocalDate date) {
-        this.id = id;
-        this.number = number;
-        this.date = date;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    @Builder.Default
+    private List<ItemDto> items = new ArrayList<>();
+    @Builder.Default
+    private List<ParticipantDto> participants = new ArrayList<>();
+    @Builder.Default
+    private List<PaymentDto> payments = new ArrayList<>();
 }
