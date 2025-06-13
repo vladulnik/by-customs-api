@@ -2,7 +2,7 @@ package by.customs.by_customs_api.service.impl;
 
 import by.customs.by_customs_api.dto.DeclarationDto;
 import by.customs.by_customs_api.entity.DeclarationEntity;
-import by.customs.by_customs_api.exception.ResourceNotFoundException;
+import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.DeclarationMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import org.junit.jupiter.api.BeforeEach;

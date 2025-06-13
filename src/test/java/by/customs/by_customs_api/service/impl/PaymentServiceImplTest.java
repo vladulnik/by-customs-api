@@ -3,7 +3,7 @@ package by.customs.by_customs_api.service.impl;
 import by.customs.by_customs_api.dto.PaymentDto;
 import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.PaymentEntity;
-import by.customs.by_customs_api.exception.ResourceNotFoundException;
+import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.PaymentMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.PaymentRepository;

@@ -3,7 +3,7 @@ package by.customs.by_customs_api.service.impl;
 import by.customs.by_customs_api.dto.ItemDto;
 import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.ItemEntity;
-import by.customs.by_customs_api.exception.ResourceNotFoundException;
+import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.ItemMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ItemRepository;

@@ -1,43 +1,52 @@
 package by.customs.by_customs_api.exception;
 
-import by.customs.by_customs_api.dto.ErrorResponse;
+import by.customs.by_customs_api.exception.exceptions.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.context.request.WebRequest;
+
+import java.time.LocalDateTime;
 
 /**
- * Центральная точка обработки исключений REST API.
+ * Глобальный обработчик исключений
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorResponse handleNotFound(ResourceNotFoundException ex) {
-        return new ErrorResponse("NOT_FOUND", ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex, WebRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ErrorResponse handleBadRequest(BadRequestException ex) {
-        return new ErrorResponse("BAD_REQUEST", ex.getMessage());
+    @ExceptionHandler({
+            BadRequestException.class,
+            InvalidHsCodeException.class,
+            DuplicateDeclarationException.class
+    })
+    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex, WebRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    @ResponseBody
-    public ErrorResponse handleResponseStatus(ResponseStatusException ex) {
-        return new ErrorResponse(ex.getStatus().name(), ex.getReason());
+    @ExceptionHandler(XmlGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleXmlGeneration(XmlGenerationException ex, WebRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public ErrorResponse handleAll(Exception ex) {
-        return new ErrorResponse("INTERNAL_ERROR", "Unexpected error");
+    public ResponseEntity<ErrorResponse> handleOther(Exception ex, WebRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request);
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, WebRequest request) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+        return ResponseEntity.status(status).body(response);
     }
 }
