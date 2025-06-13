@@ -37,7 +37,7 @@ public class XmlGenerationMain {
         pay.setDeclarationId(null);
 
         // Генерируем XML
-        String xml = xmlService.toXml(
+        String xml = xmlService.generateXml(
                 decl,
                 List.of(item),
                 List.of(part),

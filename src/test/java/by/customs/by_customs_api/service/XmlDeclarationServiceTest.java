@@ -45,7 +45,7 @@ class XmlDeclarationServiceTest {
         pay.setExcise(0.5);
         pay.setDeclarationId(null);
 
-        String xml = xmlService.toXml(
+        String xml = xmlService.generateXml(
                 decl,
                 List.of(item),
                 List.of(part),
