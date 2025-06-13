@@ -8,49 +8,96 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сущность, представляющая таможенную декларацию.
+ * Сущность декларации (ДТ-1, ДТ-2)
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = DeclarationEntity.TABLE_NAME)
+@Table(name = "declarations")
 public class DeclarationEntity {
 
-    public static final String TABLE_NAME = "declarations";
-
-    /**
-     * Уникальный идентификатор декларации.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Номер декларации (например, "DEC123").
-     */
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String number;
 
-    /**
-     * Дата оформления декларации.
-     */
     @Column(nullable = false)
     private LocalDate date;
 
-    /**
-     * Список товарных позиций, связанных с этой декларацией.
-     */
     @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemEntity> items;
+    @Builder.Default
+    private List<ItemEntity> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ParticipantEntity> participants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PaymentEntity> payments = new ArrayList<>();
+
+    /**
+     * Добавить товар с установкой двусторонней связи
+     */
+    public void addItem(ItemEntity item) {
+        items.add(item);
+        item.setDeclaration(this);
+    }
+
+    /**
+     * Добавить участника с установкой двусторонней связи
+     */
+    public void addParticipant(ParticipantEntity participant) {
+        participants.add(participant);
+        participant.setDeclaration(this);
+    }
+
+    /**
+     * Добавить платеж с установкой двусторонней связи
+     */
+    public void addPayment(PaymentEntity payment) {
+        payments.add(payment);
+        payment.setDeclaration(this);
+    }
+
+    /**
+     * Удалить товар с разрывом двусторонней связи
+     */
+    public void removeItem(ItemEntity item) {
+        items.remove(item);
+        item.setDeclaration(null);
+    }
+
+    /**
+     * Удалить участника с разрывом двусторонней связи
+     */
+    public void removeParticipant(ParticipantEntity participant) {
+        participants.remove(participant);
+        participant.setDeclaration(null);
+    }
+
+    /**
+     * Удалить платеж с разрывом двусторонней связи
+     */
+    public void removePayment(PaymentEntity payment) {
+        payments.remove(payment);
+        payment.setDeclaration(null);
+    }
 }
