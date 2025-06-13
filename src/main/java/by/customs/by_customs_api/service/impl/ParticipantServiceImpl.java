@@ -30,7 +30,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     @Override
-    public ParticipantDto create(ParticipantDto dto) {
+    public ParticipantDto createParticipant(ParticipantDto dto) {
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
@@ -41,7 +41,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     @Override
     @Transactional(readOnly = true)
-    public ParticipantDto getById(Long id) {
+    public ParticipantDto getParticipantById(Long id) {
         ParticipantEntity entity = participantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Participant not found with id: " + id));
@@ -50,13 +50,13 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ParticipantDto> getAll(Pageable pageable) {
+    public Page<ParticipantDto> getAllParticipants(Pageable pageable) {
         return participantRepository.findAll(pageable)
                 .map(participantMapper::toDto);
     }
 
     @Override
-    public ParticipantDto update(Long id, ParticipantDto dto) {
+    public ParticipantDto updateParticipant(Long id, ParticipantDto dto) {
         ParticipantEntity existing = participantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Participant not found with id: " + id));
@@ -70,7 +70,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteParticipant(Long id) {
         if (!participantRepository.existsById(id)) {
             throw new ResourceNotFoundException("Participant not found with id: " + id);
         }

@@ -6,13 +6,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface PaymentService {
 
-    PaymentDto create(PaymentDto dto);
+    PaymentDto createPayment(PaymentDto dto);
 
-    PaymentDto getById(Long id);
+    PaymentDto getPaymentById(Long id);
 
-    Page<PaymentDto> getAll(Pageable pageable);
+    Page<PaymentDto> getAllPayments(Pageable pageable);
 
-    PaymentDto update(Long id, PaymentDto dto);
+    PaymentDto updatePayment(Long id, PaymentDto dto);
 
-    void delete(Long id);
+    void deletePayment(Long id);
 }

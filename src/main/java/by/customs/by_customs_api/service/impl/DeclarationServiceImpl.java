@@ -21,7 +21,7 @@ public class DeclarationServiceImpl implements DeclarationService {
     private final DeclarationMapper mapper;
 
     @Override
-    public DeclarationDto create(DeclarationDto dto) {
+    public DeclarationDto createDeclaration(DeclarationDto dto) {
         DeclarationEntity entity = mapper.toEntity(dto);
         DeclarationEntity saved = repository.save(entity);
         return mapper.toDto(saved);
@@ -29,7 +29,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeclarationDto getById(Long id) {
+    public DeclarationDto getDeclarationById(Long id) {
         DeclarationEntity entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + id));
@@ -38,13 +38,13 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<DeclarationDto> getAll(Pageable pageable) {
+    public Page<DeclarationDto> getAllDeclarations(Pageable pageable) {
         return repository.findAll(pageable)
                 .map(mapper::toDto);
     }
 
     @Override
-    public DeclarationDto update(Long id, DeclarationDto dto) {
+    public DeclarationDto updateDeclaration(Long id, DeclarationDto dto) {
         DeclarationEntity existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + id));
@@ -54,7 +54,7 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteDeclaration(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Declaration not found with id: " + id);
         }

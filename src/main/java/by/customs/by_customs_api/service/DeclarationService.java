@@ -6,16 +6,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface DeclarationService {
 
-    DeclarationDto create(DeclarationDto dto);
+    DeclarationDto createDeclaration(DeclarationDto dto);
 
-    DeclarationDto getById(Long id);
+    DeclarationDto getDeclarationById(Long id);
 
-    /**
-     * Получить страницу деклараций с поддержкой пагинации и сортировки.
-     */
-    Page<DeclarationDto> getAll(Pageable pageable);
+    Page<DeclarationDto> getAllDeclarations(Pageable pageable);
 
-    DeclarationDto update(Long id, DeclarationDto dto);
+    DeclarationDto updateDeclaration(Long id, DeclarationDto dto);
 
-    void delete(Long id);
+    void deleteDeclaration(Long id);
 }

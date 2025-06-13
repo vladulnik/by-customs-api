@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDto create(PaymentDto dto) {
+    public PaymentDto createPayment(PaymentDto dto) {
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentDto getById(Long id) {
+    public PaymentDto getPaymentById(Long id) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Payment not found with id: " + id));
@@ -50,13 +50,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PaymentDto> getAll(Pageable pageable) {
+    public Page<PaymentDto> getAllPayments(Pageable pageable) {
         return paymentRepository.findAll(pageable)
                 .map(paymentMapper::toDto);
     }
 
     @Override
-    public PaymentDto update(Long id, PaymentDto dto) {
+    public PaymentDto updatePayment(Long id, PaymentDto dto) {
         PaymentEntity existing = paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Payment not found with id: " + id));
@@ -71,7 +71,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deletePayment(Long id) {
         if (!paymentRepository.existsById(id)) {
             throw new ResourceNotFoundException("Payment not found with id: " + id);
         }

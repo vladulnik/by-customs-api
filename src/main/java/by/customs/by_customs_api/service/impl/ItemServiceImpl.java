@@ -30,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto create(ItemDto dto) {
+    public ItemDto createItem(ItemDto dto) {
         DeclarationEntity decl = declarationRepository.findById(dto.getDeclarationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Declaration not found with id: " + dto.getDeclarationId()));
@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto getById(Long id) {
+    public ItemDto getItemById(Long id) {
         ItemEntity entity = itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Item not found with id: " + id));
@@ -50,13 +50,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ItemDto> getAll(Pageable pageable) {
+    public Page<ItemDto> getAllItems(Pageable pageable) {
         return itemRepository.findAll(pageable)
                 .map(itemMapper::toDto);
     }
 
     @Override
-    public ItemDto update(Long id, ItemDto dto) {
+    public ItemDto updateItem(Long id, ItemDto dto) {
         ItemEntity existing = itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Item not found with id: " + id));
@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteItem(Long id) {
         if (!itemRepository.existsById(id)) {
             throw new ResourceNotFoundException("Item not found with id: " + id);
         }

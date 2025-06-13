@@ -6,13 +6,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface ItemService {
 
-    ItemDto create(ItemDto dto);
+    ItemDto createItem(ItemDto dto);
 
-    ItemDto getById(Long id);
+    ItemDto getItemById(Long id);
 
-    Page<ItemDto> getAll(Pageable pageable);
+    Page<ItemDto> getAllItems(Pageable pageable);
 
-    ItemDto update(Long id, ItemDto dto);
+    ItemDto updateItem(Long id, ItemDto dto);
 
-    void delete(Long id);
+    void deleteItem(Long id);
 }

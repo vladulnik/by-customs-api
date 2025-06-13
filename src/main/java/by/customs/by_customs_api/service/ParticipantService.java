@@ -6,13 +6,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface ParticipantService {
 
-    ParticipantDto create(ParticipantDto dto);
+    ParticipantDto createParticipant(ParticipantDto dto);
 
-    ParticipantDto getById(Long id);
+    ParticipantDto getParticipantById(Long id);
 
-    Page<ParticipantDto> getAll(Pageable pageable);
+    Page<ParticipantDto> getAllParticipants(Pageable pageable);
 
-    ParticipantDto update(Long id, ParticipantDto dto);
+    ParticipantDto updateParticipant(Long id, ParticipantDto dto);
 
-    void delete(Long id);
+    void deleteParticipant(Long id);
 }
