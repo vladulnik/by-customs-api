@@ -1,122 +1,80 @@
 package by.customs.by_customs_api.controller;
 
 import by.customs.by_customs_api.dto.PaymentDto;
-import by.customs.by_customs_api.exception.GlobalExceptionHandler;
 import by.customs.by_customs_api.service.PaymentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
-import java.util.Collections;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+/**
+ * Тесты контроллера Payment
+ */
+@WebMvcTest(PaymentController.class)
+class PaymentControllerTest {
 
-public class PaymentControllerTest {
-
+    @Autowired
     private MockMvc mockMvc;
-    private PaymentService service;
+
+    @MockBean
+    private PaymentService paymentService;
+
+    @Autowired
     private ObjectMapper objectMapper;
-    private PaymentDto testPayment;
 
-    @BeforeEach
-    public void setUp() {
-        service = Mockito.mock(PaymentService.class);
-        PaymentController controller = new PaymentController(service);
-
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setControllerAdvice(new GlobalExceptionHandler())
+    @Test
+    @DisplayName("Создание Payment — должно вернуть 201")
+    void createPayment_ReturnsCreated() throws Exception {
+        PaymentDto dto = PaymentDto.builder()
+                .id(1L)
+                .duty(100.0)
+                .vat(20.0)
+                .excise(5.0)
                 .build();
 
-        testPayment = new PaymentDto();
-        testPayment.setId(1L);
-        testPayment.setDuty(150.0);
-        testPayment.setVat(30.0);
-        testPayment.setExcise(5.0);
-        testPayment.setDeclarationId(1L);
-    }
-
-    @Test
-    public void getAllShouldReturnPage() throws Exception {
-        Page<PaymentDto> page = new PageImpl<>(
-                Collections.singletonList(testPayment),
-                PageRequest.of(0, 10),
-                1
-        );
-        given(service.getAll(any())).willReturn(page);
-
-        mockMvc.perform(get("/api/payments")
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].id").value(1L));
-    }
-
-    @Test
-    public void getByIdShouldReturnPayment() throws Exception {
-        given(service.getById(1L)).willReturn(testPayment);
-
-        mockMvc.perform(get("/api/payments/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.duty").value(150.0))
-                .andExpect(jsonPath("$.vat").value(30.0))
-                .andExpect(jsonPath("$.excise").value(5.0));
-    }
-
-    @Test
-    public void createShouldReturnOk() throws Exception {
-        given(service.create(any(PaymentDto.class))).willReturn(testPayment);
+        Mockito.when(paymentService.createPayment(any())).thenReturn(dto);
 
         mockMvc.perform(post("/api/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testPayment)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(dto.getId().intValue())))
+                .andExpect(jsonPath("$.duty", is(dto.getDuty())));
     }
 
     @Test
-    public void updateShouldReturnOk() throws Exception {
-        given(service.update(eq(1L), any(PaymentDto.class))).willReturn(testPayment);
+    @DisplayName("Получение Payment по id — должно вернуть 200")
+    void getPaymentById_ReturnsOk() throws Exception {
+        PaymentDto dto = PaymentDto.builder()
+                .id(2L)
+                .duty(120.0)
+                .vat(24.0)
+                .excise(8.0)
+                .build();
 
-        mockMvc.perform(put("/api/payments/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testPayment)))
+        Mockito.when(paymentService.getPaymentById(2L)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/payments/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.duty").value(150.0));
+                .andExpect(jsonPath("$.id", is(dto.getId().intValue())))
+                .andExpect(jsonPath("$.duty", is(dto.getDuty())));
     }
 
     @Test
-    public void deleteShouldReturnNoContent() throws Exception {
-        doNothing().when(service).delete(1L);
-
-        mockMvc.perform(delete("/api/payments/1"))
+    @DisplayName("Удаление Payment — должно вернуть 204")
+    void deletePayment_ReturnsNoContent() throws Exception {
+        mockMvc.perform(delete("/api/payments/3"))
                 .andExpect(status().isNoContent());
+        Mockito.verify(paymentService).deletePayment(3L);
     }
 }

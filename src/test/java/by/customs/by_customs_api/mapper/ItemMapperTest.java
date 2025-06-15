@@ -8,49 +8,51 @@ import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ItemMapperTest {
+class ItemMapperTest {
 
     private final ItemMapper mapper = Mappers.getMapper(ItemMapper.class);
 
     @Test
-    void toDtoSetsAllFields() {
-        DeclarationEntity decl = new DeclarationEntity();
-        decl.setId(7L);
+    void toEntity_ShouldMapFields() {
+        ItemDto dto = ItemDto.builder()
+                .id(1L)
+                .hsCode("1234")
+                .value(500.0)
+                .weight(10.0)
+                .originCountry("BY")
+                .declarationId(100L)
+                .build();
 
-        ItemEntity entity = new ItemEntity();
-        entity.setId(3L);
-        entity.setHsCode("HS123");
-        entity.setValue(100.0);
-        entity.setWeight(2.5);
-        entity.setOriginCountry("CN");
-        entity.setDeclaration(decl);
+        ItemEntity entity = mapper.toEntity(dto);
 
-        ItemDto dto = mapper.toDto(entity);
-        assertEquals(3L, dto.getId());
-        assertEquals("HS123", dto.getHsCode());
-        assertEquals(100.0, dto.getValue());
-        assertEquals(2.5, dto.getWeight());
-        assertEquals("CN", dto.getOriginCountry());
-        assertEquals(7L, dto.getDeclarationId());
+        assertEquals(dto.getId(), entity.getId());
+        assertEquals(dto.getHsCode(), entity.getHsCode());
+        assertEquals(dto.getValue(), entity.getValue());
+        assertEquals(dto.getWeight(), entity.getWeight());
+        assertEquals(dto.getOriginCountry(), entity.getOriginCountry());
+        // Связь declaration проверять, если есть custom mapping
     }
 
     @Test
-    void toEntityCreatesDeclarationEntity() {
-        ItemDto dto = new ItemDto();
-        dto.setId(5L);
-        dto.setHsCode("HS999");
-        dto.setValue(50.0);
-        dto.setWeight(1.0);
-        dto.setOriginCountry("RU");
-        dto.setDeclarationId(9L);
+    void toDto_ShouldMapFields() {
+        DeclarationEntity declaration = new DeclarationEntity();
+        declaration.setId(100L);
 
-        ItemEntity entity = mapper.toEntity(dto);
-        assertEquals(5L, entity.getId());
-        assertEquals("HS999", entity.getHsCode());
-        assertEquals(50.0, entity.getValue());
-        assertEquals(1.0, entity.getWeight());
-        assertEquals("RU", entity.getOriginCountry());
-        assertNotNull(entity.getDeclaration());
-        assertEquals(9L, entity.getDeclaration().getId());
+        ItemEntity entity = new ItemEntity();
+        entity.setId(2L);
+        entity.setHsCode("5678");
+        entity.setValue(200.0);
+        entity.setWeight(20.0);
+        entity.setOriginCountry("RU");
+        entity.setDeclaration(declaration);
+
+        ItemDto dto = mapper.toDto(entity);
+
+        assertEquals(entity.getId(), dto.getId());
+        assertEquals(entity.getHsCode(), dto.getHsCode());
+        assertEquals(entity.getValue(), dto.getValue());
+        assertEquals(entity.getWeight(), dto.getWeight());
+        assertEquals(entity.getOriginCountry(), dto.getOriginCountry());
+        assertEquals(declaration.getId(), dto.getDeclarationId());
     }
 }

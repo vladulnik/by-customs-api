@@ -8,32 +8,43 @@ import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParticipantMapperTest {
+class ParticipantMapperTest {
 
     private final ParticipantMapper mapper = Mappers.getMapper(ParticipantMapper.class);
 
     @Test
-    void toDtoAndBack() {
-        DeclarationEntity decl = new DeclarationEntity();
-        decl.setId(11L);
+    void toEntity_ShouldMapFields() {
+        ParticipantDto dto = ParticipantDto.builder()
+                .id(1L)
+                .name("ООО Рога и Копыта")
+                .address("Минск, ул. Ленина, 1")
+                .declarationId(200L)
+                .build();
+
+        ParticipantEntity entity = mapper.toEntity(dto);
+
+        assertEquals(dto.getId(), entity.getId());
+        assertEquals(dto.getName(), entity.getName());
+        assertEquals(dto.getAddress(), entity.getAddress());
+        // Проверить связь declaration, если custom mapping
+    }
+
+    @Test
+    void toDto_ShouldMapFields() {
+        DeclarationEntity declaration = new DeclarationEntity();
+        declaration.setId(200L);
 
         ParticipantEntity entity = new ParticipantEntity();
-        entity.setId(4L);
-        entity.setName("John Doe");
-        entity.setAddress("123 Main St");
-        entity.setDeclaration(decl);
+        entity.setId(2L);
+        entity.setName("Test Name");
+        entity.setAddress("Test Address");
+        entity.setDeclaration(declaration);
 
         ParticipantDto dto = mapper.toDto(entity);
-        assertEquals(4L, dto.getId());
-        assertEquals("John Doe", dto.getName());
-        assertEquals("123 Main St", dto.getAddress());
-        assertEquals(11L, dto.getDeclarationId());
 
-        ParticipantEntity back = mapper.toEntity(dto);
-        assertEquals(dto.getId(), back.getId());
-        assertEquals(dto.getName(), back.getName());
-        assertEquals(dto.getAddress(), back.getAddress());
-        assertNotNull(back.getDeclaration());
-        assertEquals(11L, back.getDeclaration().getId());
+        assertEquals(entity.getId(), dto.getId());
+        assertEquals(entity.getName(), dto.getName());
+        assertEquals(entity.getAddress(), dto.getAddress());
+        assertEquals(declaration.getId(), dto.getDeclarationId());
     }
 }

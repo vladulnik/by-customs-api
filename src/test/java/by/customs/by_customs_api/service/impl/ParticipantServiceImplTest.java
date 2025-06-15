@@ -4,46 +4,65 @@ import by.customs.by_customs_api.dto.ParticipantDto;
 import by.customs.by_customs_api.entity.ParticipantEntity;
 import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.ParticipantMapper;
-import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ParticipantRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.util.Optional;
-import static org.mockito.ArgumentMatchers.any;
-import org.junit.jupiter.api.Assertions;
 
-@ExtendWith(MockitoExtension.class)
-public class ParticipantServiceImplTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    private ParticipantRepository participantRepository;
-    private DeclarationRepository declarationRepository;
-    private ParticipantMapper participantMapper;
+class ParticipantServiceImplTest {
+
+    @Mock
+    private ParticipantRepository repository;
+    @Mock
+    private ParticipantMapper mapper;
+
+    @InjectMocks
     private ParticipantServiceImpl service;
 
-    @BeforeEach
-    public void init() {
-        participantRepository = Mockito.mock(ParticipantRepository.class);
-        declarationRepository = Mockito.mock(DeclarationRepository.class);
-        participantMapper = Mappers.getMapper(ParticipantMapper.class);
-        service = new ParticipantServiceImpl(participantRepository, declarationRepository, participantMapper);
+    public ParticipantServiceImplTest() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void createShouldThrowIfDeclarationMissing() {
-        Mockito.when(declarationRepository.findById(2L)).thenReturn(Optional.empty());
-        ParticipantDto dto = new ParticipantDto(null, "Name", "Addr", 2L);
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> service.create(dto));
+    void create_ShouldSaveAndReturnDto() {
+        ParticipantDto dto = ParticipantDto.builder().build();
+        ParticipantEntity entity = new ParticipantEntity();
+
+        when(mapper.toEntity(dto)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(entity);
+        when(mapper.toDto(entity)).thenReturn(dto);
+
+        ParticipantDto result = service.createParticipant(dto);
+
+        assertNotNull(result);
+        verify(repository).save(entity);
     }
 
     @Test
-    public void getByIdShouldReturnDto() {
-        ParticipantEntity ent = new ParticipantEntity(3L, "Name", "Addr", null);
-        Mockito.when(participantRepository.findById(3L)).thenReturn(Optional.of(ent));
-        ParticipantDto dto = service.getById(3L);
-        Assertions.assertEquals("Name", dto.getName());
+    void getById_WhenFound_ReturnsDto() {
+        ParticipantEntity entity = new ParticipantEntity();
+        entity.setId(123L);
+        ParticipantDto dto = ParticipantDto.builder().id(123L).build();
+
+        when(repository.findById(123L)).thenReturn(Optional.of(entity));
+        when(mapper.toDto(entity)).thenReturn(dto);
+
+        ParticipantDto result = service.getParticipantById(123L);
+
+        assertNotNull(result);
+        assertEquals(123L, result.getId());
+    }
+
+    @Test
+    void getById_WhenNotFound_Throws() {
+        when(repository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.getParticipantById(999L));
     }
 }

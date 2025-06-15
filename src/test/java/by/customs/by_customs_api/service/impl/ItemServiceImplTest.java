@@ -1,59 +1,68 @@
 package by.customs.by_customs_api.service.impl;
 
 import by.customs.by_customs_api.dto.ItemDto;
-import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.entity.ItemEntity;
 import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.ItemMapper;
-import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ItemRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.util.Optional;
-import static org.mockito.ArgumentMatchers.any;
-import org.junit.jupiter.api.Assertions;
 
-@ExtendWith(MockitoExtension.class)
-public class ItemServiceImplTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    private ItemRepository itemRepository;
-    private DeclarationRepository declarationRepository;
-    private ItemMapper itemMapper;
+class ItemServiceImplTest {
+
+    @Mock
+    private ItemRepository repository;
+    @Mock
+    private ItemMapper mapper;
+
+    @InjectMocks
     private ItemServiceImpl service;
 
-    @BeforeEach
-    public void setUp() {
-        itemRepository = Mockito.mock(ItemRepository.class);
-        declarationRepository = Mockito.mock(DeclarationRepository.class);
-        itemMapper = Mappers.getMapper(ItemMapper.class);
-        service = new ItemServiceImpl(itemRepository, declarationRepository, itemMapper);
+    public ItemServiceImplTest() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void createShouldMapAndSave() {
-        DeclarationEntity decl = new DeclarationEntity();
-        decl.setId(1L);
-        Mockito.when(declarationRepository.findById(1L)).thenReturn(Optional.of(decl));
+    void create_ShouldSaveAndReturnDto() {
+        ItemDto dto = ItemDto.builder().build();
+        ItemEntity entity = new ItemEntity();
 
-        ItemDto dto = new ItemDto(null, "HS123", 100.0, 2.5, "RU", 1L);
-        ItemEntity saved = new ItemEntity(5L, "HS123", 100.0, 2.5, "RU", decl);
-        Mockito.when(itemRepository.save(any(ItemEntity.class))).thenReturn(saved);
+        when(mapper.toEntity(dto)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(entity);
+        when(mapper.toDto(entity)).thenReturn(dto);
 
-        ItemDto result = service.create(dto);
+        ItemDto result = service.createItem(dto);
 
-        Assertions.assertEquals(5L, result.getId());
-        Assertions.assertEquals("HS123", result.getHsCode());
-        Assertions.assertEquals(1L, result.getDeclarationId());
-        Mockito.verify(itemRepository).save(any(ItemEntity.class));
+        assertNotNull(result);
+        verify(repository).save(entity);
     }
 
     @Test
-    public void getByIdShouldThrow() {
-        Mockito.when(itemRepository.findById(10L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> service.getById(10L));
+    void getById_WhenFound_ReturnsDto() {
+        ItemEntity entity = new ItemEntity();
+        entity.setId(123L);
+        ItemDto dto = ItemDto.builder().id(123L).build();
+
+        when(repository.findById(123L)).thenReturn(Optional.of(entity));
+        when(mapper.toDto(entity)).thenReturn(dto);
+
+        ItemDto result = service.getItemById(123L);
+
+        assertNotNull(result);
+        assertEquals(123L, result.getId());
+    }
+
+    @Test
+    void getById_WhenNotFound_Throws() {
+        when(repository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.getItemById(999L));
     }
 }

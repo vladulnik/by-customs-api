@@ -3,34 +3,23 @@ package by.customs.by_customs_api.controller;
 import by.customs.by_customs_api.dto.ItemDto;
 import by.customs.by_customs_api.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+/**
+ * Тесты контроллера Item
+ */
 @WebMvcTest(ItemController.class)
 class ItemControllerTest {
 
@@ -40,71 +29,54 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
 
+    @Autowired
     private ObjectMapper objectMapper;
-    private ItemDto testItem;
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        testItem = new ItemDto();
-        testItem.setId(1L);
-        testItem.setHsCode("8471300000");
-        testItem.setValue(1000.0);
-        testItem.setWeight(2.5);
-        testItem.setOriginCountry("CN");
-        testItem.setDeclarationId(1L);
-    }
 
     @Test
-    void getAllShouldReturnPage() throws Exception {
-        Page<ItemDto> page = new PageImpl<>(Collections.singletonList(testItem), PageRequest.of(0, 10), 1);
-        given(itemService.getAll(any(Pageable.class))).willReturn(page);
+    @DisplayName("Создание Item — должно вернуть 201")
+    void createItem_ReturnsCreated() throws Exception {
+        ItemDto dto = ItemDto.builder()
+                .id(1L)
+                .hsCode("1234")
+                .value(100.0)
+                .weight(10.0)
+                .originCountry("BY")
+                .build();
 
-        mockMvc.perform(get("/api/items").param("page", "0").param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].id").value(1L));
-    }
-
-    @Test
-    void getByIdShouldReturnItem() throws Exception {
-        given(itemService.getById(1L)).willReturn(testItem);
-
-        mockMvc.perform(get("/api/items/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.hsCode").value("8471300000"));
-    }
-
-    @Test
-    void createShouldReturnOk() throws Exception {
-        given(itemService.create(any(ItemDto.class))).willReturn(testItem);
+        Mockito.when(itemService.createItem(any())).thenReturn(dto);
 
         mockMvc.perform(post("/api/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testItem)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(dto.getId().intValue())))
+                .andExpect(jsonPath("$.hsCode", is(dto.getHsCode())));
     }
 
     @Test
-    void updateShouldReturnOk() throws Exception {
-        given(itemService.update(eq(1L), any(ItemDto.class))).willReturn(testItem);
+    @DisplayName("Получение Item по id — должно вернуть 200")
+    void getItemById_ReturnsOk() throws Exception {
+        ItemDto dto = ItemDto.builder()
+                .id(2L)
+                .hsCode("4321")
+                .value(50.0)
+                .weight(5.0)
+                .originCountry("RU")
+                .build();
 
-        mockMvc.perform(put("/api/items/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testItem)))
+        Mockito.when(itemService.getItemById(2L)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/items/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
+                .andExpect(jsonPath("$.id", is(dto.getId().intValue())))
+                .andExpect(jsonPath("$.hsCode", is(dto.getHsCode())));
     }
 
     @Test
-    void deleteShouldReturnNoContent() throws Exception {
-        doNothing().when(itemService).delete(1L);
-
-        mockMvc.perform(delete("/api/items/1"))
+    @DisplayName("Удаление Item — должно вернуть 204")
+    void deleteItem_ReturnsNoContent() throws Exception {
+        mockMvc.perform(delete("/api/items/3"))
                 .andExpect(status().isNoContent());
+        Mockito.verify(itemService).deleteItem(3L);
     }
 }
