@@ -23,6 +23,17 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public DeclarationDto createDeclaration(DeclarationDto dto) {
         DeclarationEntity entity = mapper.toEntity(dto);
+
+        if (entity.getItems() != null) {
+            entity.getItems().forEach(item -> item.setDeclaration(entity));
+        }
+        if (entity.getParticipants() != null) {
+            entity.getParticipants().forEach(part -> part.setDeclaration(entity));
+        }
+        if (entity.getPayments() != null) {
+            entity.getPayments().forEach(pay -> pay.setDeclaration(entity));
+        }
+
         DeclarationEntity saved = repository.save(entity);
         return mapper.toDto(saved);
     }
