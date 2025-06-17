@@ -5,33 +5,30 @@ import by.customs.by_customs_api.entity.DeclarationEntity;
 import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.mapper.DeclarationMapper;
 import by.customs.by_customs_api.repository.DeclarationRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class DeclarationServiceImplTest {
 
-    @Mock
     private DeclarationRepository repository;
-    @Mock
     private DeclarationMapper mapper;
-
-    @InjectMocks
     private DeclarationServiceImpl service;
 
-    public DeclarationServiceImplTest() {
-        MockitoAnnotations.openMocks(this);
+    @BeforeEach
+    void setUp() {
+        repository = mock(DeclarationRepository.class);
+        mapper = mock(DeclarationMapper.class);
+        service = new DeclarationServiceImpl(repository, mapper);
     }
 
     @Test
@@ -72,7 +69,7 @@ class DeclarationServiceImplTest {
     }
 
     @Test
-    void getAll_ReturnsPageOfDtos() {
+    void getAllDeclarations_ReturnsPageOfDtos() {
         DeclarationEntity entity = new DeclarationEntity();
         DeclarationDto dto = DeclarationDto.builder().build();
 
@@ -101,19 +98,17 @@ class DeclarationServiceImplTest {
 
     @Test
     void deleteDeclaration_WhenFound_Deletes() {
-        DeclarationEntity entity = new DeclarationEntity();
-        entity.setId(1L);
-        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.existsById(1L)).thenReturn(true);
 
         service.deleteDeclaration(1L);
 
-        verify(repository).delete(entity);
+        verify(repository).deleteById(1L);
     }
-
 
     @Test
     void deleteDeclaration_WhenNotFound_Throws() {
-        when(repository.findById(123L)).thenReturn(Optional.empty());
+        when(repository.existsById(123L)).thenReturn(false);
+
         assertThrows(ResourceNotFoundException.class, () -> service.deleteDeclaration(123L));
     }
 }
