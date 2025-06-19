@@ -19,41 +19,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex, WebRequest request) {
-//        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
-//    }
-//
-//    @ExceptionHandler({
-//            BadRequestException.class,
-//            InvalidHsCodeException.class,
-//            DuplicateDeclarationException.class
-//    })
-//    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex, WebRequest request) {
-//        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
-//    }
-//
-//    @ExceptionHandler(XmlGenerationException.class)
-//    public ResponseEntity<ErrorResponse> handleXmlGeneration(XmlGenerationException ex, WebRequest request) {
-//        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
-//    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ErrorResponse> handleOther(Exception ex, WebRequest request) {
-//        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request);
-//    }
-//
-//    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, WebRequest request) {
-//        ErrorResponse response = ErrorResponse.builder()
-//                .timestamp(LocalDateTime.now())
-//                .status(status.value())
-//                .error(status.getReasonPhrase())
-//                .message(message)
-//                .path(request.getDescription(false).replace("uri=", ""))
-//                .build();
-//        return ResponseEntity.status(status).body(response);
-//    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex, WebRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
