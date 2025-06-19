@@ -1,5 +1,6 @@
 package by.customs.by_customs_api.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,6 @@ public class ParticipantDto {
     private Long id;
     private String name;
     private String address;
+    @NotNull(message = "declarationId is required")
     private Long declarationId;
 }

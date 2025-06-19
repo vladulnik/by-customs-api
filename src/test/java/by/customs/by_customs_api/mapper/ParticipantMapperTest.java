@@ -26,7 +26,6 @@ class ParticipantMapperTest {
         assertEquals(dto.getId(), entity.getId());
         assertEquals(dto.getName(), entity.getName());
         assertEquals(dto.getAddress(), entity.getAddress());
-        // Проверить связь declaration, если custom mapping
     }
 
     @Test
@@ -46,5 +45,36 @@ class ParticipantMapperTest {
         assertEquals(entity.getName(), dto.getName());
         assertEquals(entity.getAddress(), dto.getAddress());
         assertEquals(declaration.getId(), dto.getDeclarationId());
+    }
+
+    @Test
+    void toEntityAndBack_ShouldMapFields() {
+        ParticipantDto dto = ParticipantDto.builder()
+                .id(1L)
+                .name("TestName")
+                .address("TestAddress")
+                .declarationId(5L)
+                .build();
+
+        ParticipantEntity entity = mapper.toEntity(dto);
+        assertEquals(dto.getName(), entity.getName());
+        assertEquals(dto.getAddress(), entity.getAddress());
+
+        DeclarationEntity declaration = new DeclarationEntity();
+        declaration.setId(dto.getDeclarationId());
+        entity.setDeclaration(declaration);
+
+        ParticipantDto back = mapper.toDto(entity);
+        assertEquals(dto.getDeclarationId(), back.getDeclarationId());
+    }
+
+    @Test
+    void toEntity_Null_ShouldNotThrow() {
+        assertNull(mapper.toEntity(null));
+    }
+
+    @Test
+    void toDto_Null_ShouldNotThrow() {
+        assertNull(mapper.toDto(null));
     }
 }

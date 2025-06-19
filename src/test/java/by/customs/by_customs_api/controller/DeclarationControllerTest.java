@@ -1,6 +1,7 @@
 package by.customs.by_customs_api.controller;
 
 import by.customs.by_customs_api.dto.DeclarationDto;
+import by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException;
 import by.customs.by_customs_api.service.DeclarationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +11,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -22,6 +24,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,7 +57,7 @@ class DeclarationControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        Mockito.when(declarationService.createDeclaration(any())).thenReturn(dto);
+        when(declarationService.createDeclaration(any())).thenReturn(dto);
 
         mockMvc.perform(post("/api/declarations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +76,7 @@ class DeclarationControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        Mockito.when(declarationService.getDeclarationById(2L)).thenReturn(dto);
+        when(declarationService.getDeclarationById(2L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/declarations/2"))
                 .andExpect(status().isOk())
@@ -89,7 +93,7 @@ class DeclarationControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        Mockito.when(declarationService.getAllDeclarations(ArgumentMatchers.<Pageable>any()))
+        when(declarationService.getAllDeclarations(ArgumentMatchers.<Pageable>any()))
                 .thenReturn(new PageImpl<>(Collections.singletonList(dto)));
 
         mockMvc.perform(get("/api/declarations"))
@@ -107,7 +111,7 @@ class DeclarationControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        Mockito.when(declarationService.updateDeclaration(eq(4L), any())).thenReturn(dto);
+        when(declarationService.updateDeclaration(eq(4L), any())).thenReturn(dto);
 
         mockMvc.perform(put("/api/declarations/4")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,5 +127,48 @@ class DeclarationControllerTest {
         mockMvc.perform(delete("/api/declarations/5"))
                 .andExpect(status().isNoContent());
         Mockito.verify(declarationService).deleteDeclaration(5L);
+    }
+
+    @Test
+    @DisplayName("GET /api/declarations/{id} - Not Found")
+    void getDeclaration_NotFound_Returns404() throws Exception {
+        when(declarationService.getDeclarationById(999L))
+                .thenThrow(new ResourceNotFoundException("Declaration not found with id: 999"));
+        mockMvc.perform(get("/api/declarations/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Declaration not found with id: 999"));
+    }
+
+    @Test
+    @DisplayName("POST /api/declarations - invalid body returns 400")
+    void createDeclaration_InvalidBody_Returns400() throws Exception {
+        DeclarationDto invalidDto = DeclarationDto.builder().number(null).build(); // number is required
+        mockMvc.perform(post("/api/declarations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/declarations/{id} - Not Found")
+    void deleteDeclaration_NotFound_Returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Declaration not found with id: 555"))
+                .when(declarationService).deleteDeclaration(555L);
+
+        mockMvc.perform(delete("/api/declarations/555"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Declaration not found with id: 555"));
+    }
+
+    @Test
+    @DisplayName("GET /api/declarations - empty list returns 200 and empty array")
+    void getAllDeclarations_Empty_ReturnsEmptyList() throws Exception {
+        Page<DeclarationDto> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(declarationService.getAllDeclarations(any(Pageable.class))).thenReturn(emptyPage);
+
+        mockMvc.perform(get("/api/declarations?page=0&size=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
     }
 }

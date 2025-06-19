@@ -9,6 +9,9 @@ import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -68,5 +71,42 @@ class ItemServiceImplTest {
         when(itemRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.getItemById(999L));
+    }
+
+    @Test
+    void createItem_WhenDeclarationNotFound_Throws() {
+        ItemDto dto = ItemDto.builder().declarationId(11L).build();
+        when(declarationRepository.findById(11L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.createItem(dto));
+    }
+
+    @Test
+    void updateItem_WhenItemNotFound_Throws() {
+        ItemDto dto = ItemDto.builder().id(88L).declarationId(33L).build();
+        when(itemRepository.findById(88L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updateItem(88L, dto));
+    }
+
+    @Test
+    void updateItem_WhenDeclarationNotFound_Throws() {
+        ItemDto dto = ItemDto.builder().id(8L).declarationId(99L).build();
+        ItemEntity entity = new ItemEntity();
+        when(itemRepository.findById(8L)).thenReturn(Optional.of(entity));
+        when(declarationRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updateItem(8L, dto));
+    }
+
+    @Test
+    void deleteItem_WhenNotFound_Throws() {
+        when(itemRepository.existsById(55L)).thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> service.deleteItem(55L));
+    }
+
+    @Test
+    void getAllItems_EmptyPage_ReturnsEmptyPage() {
+        when(itemRepository.findAll(any(Pageable.class)))
+                .thenReturn(Page.empty());
+        Page<ItemDto> page = service.getAllItems(PageRequest.of(0, 5));
+        assertTrue(page.isEmpty());
     }
 }

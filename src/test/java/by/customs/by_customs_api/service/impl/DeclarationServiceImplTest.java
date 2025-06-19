@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -110,5 +111,40 @@ class DeclarationServiceImplTest {
         when(repository.existsById(123L)).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> service.deleteDeclaration(123L));
+    }
+
+    @Test
+    void getAllDeclarations_EmptyPage_ReturnsEmptyPage() {
+        when(repository.findAll(any(Pageable.class)))
+                .thenReturn(Page.empty());
+        Page<DeclarationDto> page = service.getAllDeclarations(PageRequest.of(0, 10));
+        assertTrue(page.isEmpty());
+    }
+
+    @Test
+    void updateDeclaration_WhenNotFound_Throws() {
+        DeclarationDto dto = DeclarationDto.builder().id(123L).build();
+        when(repository.findById(123L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updateDeclaration(123L, dto));
+    }
+
+    @Test
+    void updateDeclaration_UpdatesOnlyNumberAndDate() {
+        DeclarationDto dto = DeclarationDto.builder()
+                .id(1L).number("NEW-NUMBER").date(LocalDate.of(2020, 1, 1))
+                .build();
+        DeclarationEntity entity = new DeclarationEntity();
+        entity.setId(1L);
+        entity.setNumber("OLD-NUMBER");
+        entity.setDate(LocalDate.of(2019, 1, 1));
+
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mapper.toDto(any())).thenReturn(dto);
+
+        DeclarationDto result = service.updateDeclaration(1L, dto);
+        assertEquals("NEW-NUMBER", entity.getNumber());
+        assertEquals(LocalDate.of(2020, 1, 1), entity.getDate());
+        assertNotNull(result);
     }
 }

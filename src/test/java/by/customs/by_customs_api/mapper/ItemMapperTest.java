@@ -30,7 +30,6 @@ class ItemMapperTest {
         assertEquals(dto.getValue(), entity.getValue());
         assertEquals(dto.getWeight(), entity.getWeight());
         assertEquals(dto.getOriginCountry(), entity.getOriginCountry());
-        // Связь declaration проверять, если есть custom mapping
     }
 
     @Test
@@ -54,5 +53,40 @@ class ItemMapperTest {
         assertEquals(entity.getWeight(), dto.getWeight());
         assertEquals(entity.getOriginCountry(), dto.getOriginCountry());
         assertEquals(declaration.getId(), dto.getDeclarationId());
+    }
+
+    @Test
+    void toEntityAndBack_ShouldMapFields() {
+        ItemDto dto = ItemDto.builder()
+                .id(1L)
+                .hsCode("1000")
+                .value(500.0)
+                .weight(10.5)
+                .originCountry("BY")
+                .declarationId(7L)
+                .build();
+
+        ItemEntity entity = mapper.toEntity(dto);
+        assertEquals(dto.getHsCode(), entity.getHsCode());
+        assertEquals(dto.getValue(), entity.getValue());
+        assertEquals(dto.getWeight(), entity.getWeight());
+        assertEquals(dto.getOriginCountry(), entity.getOriginCountry());
+
+        DeclarationEntity declaration = new DeclarationEntity();
+        declaration.setId(dto.getDeclarationId());
+        entity.setDeclaration(declaration);
+
+        ItemDto back = mapper.toDto(entity);
+        assertEquals(dto.getDeclarationId(), back.getDeclarationId());
+    }
+
+    @Test
+    void toEntity_Null_ShouldNotThrow() {
+        assertNull(mapper.toEntity(null));
+    }
+
+    @Test
+    void toDto_Null_ShouldNotThrow() {
+        assertNull(mapper.toDto(null));
     }
 }

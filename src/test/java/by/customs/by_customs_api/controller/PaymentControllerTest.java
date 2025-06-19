@@ -40,6 +40,7 @@ class PaymentControllerTest {
                 .duty(100.0)
                 .vat(20.0)
                 .excise(5.0)
+                .declarationId(42L)
                 .build();
 
         Mockito.when(paymentService.createPayment(any())).thenReturn(dto);
@@ -76,5 +77,37 @@ class PaymentControllerTest {
         mockMvc.perform(delete("/api/payments/3"))
                 .andExpect(status().isNoContent());
         Mockito.verify(paymentService).deletePayment(3L);
+    }
+
+    @Test
+    void getPayment_NotFound_Returns404() throws Exception {
+        Mockito.when(paymentService.getPaymentById(1234L))
+                .thenThrow(new by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException("Payment not found"));
+        mockMvc.perform(get("/api/payments/1234"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createPayment_InvalidBody_Returns400() throws Exception {
+        mockMvc.perform(post("/api/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deletePayment_NotFound_Returns404() throws Exception {
+        Mockito.doThrow(new by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException("Payment not found"))
+                .when(paymentService).deletePayment(1002L);
+        mockMvc.perform(delete("/api/payments/1002"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updatePayment_InvalidBody_Returns400() throws Exception {
+        mockMvc.perform(put("/api/payments/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
     }
 }

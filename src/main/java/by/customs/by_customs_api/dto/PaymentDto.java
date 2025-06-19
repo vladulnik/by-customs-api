@@ -1,5 +1,6 @@
 package by.customs.by_customs_api.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,6 @@ public class PaymentDto {
     private Double duty;
     private Double vat;
     private Double excise;
+    @NotNull(message = "declarationId is required")
     private Long declarationId;
 }

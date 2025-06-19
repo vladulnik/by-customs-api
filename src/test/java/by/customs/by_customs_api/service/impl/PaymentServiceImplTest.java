@@ -9,6 +9,9 @@ import by.customs.by_customs_api.repository.DeclarationRepository;
 import by.customs.by_customs_api.repository.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -68,5 +71,42 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.getPaymentById(999L));
+    }
+
+    @Test
+    void createPayment_WhenDeclarationNotFound_Throws() {
+        PaymentDto dto = PaymentDto.builder().declarationId(22L).build();
+        when(declarationRepository.findById(22L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.createPayment(dto));
+    }
+
+    @Test
+    void updatePayment_WhenPaymentNotFound_Throws() {
+        PaymentDto dto = PaymentDto.builder().id(33L).declarationId(44L).build();
+        when(paymentRepository.findById(33L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updatePayment(33L, dto));
+    }
+
+    @Test
+    void updatePayment_WhenDeclarationNotFound_Throws() {
+        PaymentDto dto = PaymentDto.builder().id(4L).declarationId(5L).build();
+        PaymentEntity entity = new PaymentEntity();
+        when(paymentRepository.findById(4L)).thenReturn(Optional.of(entity));
+        when(declarationRepository.findById(5L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updatePayment(4L, dto));
+    }
+
+    @Test
+    void deletePayment_WhenNotFound_Throws() {
+        when(paymentRepository.existsById(101L)).thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> service.deletePayment(101L));
+    }
+
+    @Test
+    void getAllPayments_EmptyPage_ReturnsEmptyPage() {
+        when(paymentRepository.findAll(any(Pageable.class)))
+                .thenReturn(Page.empty());
+        Page<PaymentDto> page = service.getAllPayments(PageRequest.of(0, 5));
+        assertTrue(page.isEmpty());
     }
 }

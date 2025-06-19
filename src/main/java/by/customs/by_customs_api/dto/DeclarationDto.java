@@ -1,5 +1,7 @@
 package by.customs.by_customs_api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +20,9 @@ import java.util.List;
 @AllArgsConstructor
 public class DeclarationDto {
     private Long id;
+    @NotBlank
     private String number;
+    @NotNull
     private LocalDate date;
     @Builder.Default
     private List<ItemDto> items = new ArrayList<>();

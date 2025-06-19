@@ -39,6 +39,7 @@ class ParticipantControllerTest {
                 .id(1L)
                 .name("TestName")
                 .address("TestAddress")
+                .declarationId(42L)
                 .build();
 
         Mockito.when(participantService.createParticipant(any())).thenReturn(dto);
@@ -74,5 +75,37 @@ class ParticipantControllerTest {
         mockMvc.perform(delete("/api/participants/3"))
                 .andExpect(status().isNoContent());
         Mockito.verify(participantService).deleteParticipant(3L);
+    }
+
+    @Test
+    void getParticipant_NotFound_Returns404() throws Exception {
+        Mockito.when(participantService.getParticipantById(888L))
+                .thenThrow(new by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException("Participant not found"));
+        mockMvc.perform(get("/api/participants/888"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createParticipant_InvalidBody_Returns400() throws Exception {
+        mockMvc.perform(post("/api/participants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteParticipant_NotFound_Returns404() throws Exception {
+        Mockito.doThrow(new by.customs.by_customs_api.exception.exceptions.ResourceNotFoundException("Participant not found"))
+                .when(participantService).deleteParticipant(1001L);
+        mockMvc.perform(delete("/api/participants/1001"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateParticipant_InvalidBody_Returns400() throws Exception {
+        mockMvc.perform(put("/api/participants/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
     }
 }
